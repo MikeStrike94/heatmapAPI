@@ -138,4 +138,28 @@ class HeatmapController extends Controller
         // Success
         return json_encode($json_data);
     }
+
+    // List customers with the same journey
+    public function listCustomersWithSimilarJourney() {
+        try {
+            $journeys = History::listCustomersWithSimilarJourney();
+        } catch (Exception $e) {
+            return response()->json(
+                [
+                    'message' => 'Error at retriving customer journey',
+                    'error' => $e->getMessage()
+                ]
+            );
+        }
+
+        $json_data = array();
+        foreach ($journeys as $journey) {
+            $json_data[] = array(
+                'customer_id' => $journey->customer_id,
+                'full_url_list' => $journey->full_url_list
+            );
+        }
+        // Success
+        return json_encode($json_data);
+    }
 }

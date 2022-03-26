@@ -132,7 +132,6 @@ class History extends Model
     public static function countTypeHits($from = '', $to = '')
     {
         $query = DB::table('histories');
-
         $query->selectRaw(
             'histories.type_id as type_id,
             types.name as type_name,
@@ -162,7 +161,6 @@ class History extends Model
      */
     public static function listCustomerJourney($customer_id, $from = '', $to = '')
     {
-        DB::enableQueryLog();
 
         $query = DB::table('histories');
 
@@ -179,5 +177,38 @@ class History extends Model
             ->toArray();
 
         return $result;
+    }
+
+    /**
+     * List customers with similar journey
+     * A totally not good sollution, I know I should done only by SQL
+     */
+    public static function listCustomersWithSimilarJourney()
+    {
+        $query = DB::table('histories');
+        $query->selectRaw('customer_id, GROUP_CONCAT(full_url) as full_url_list');
+        $query->groupBy('customer_id');
+        $query->orderBy('created_at', 'asc');
+        $journeys = $query->get()->toArray();
+
+        $urls = array();
+        $foundJourneysUrls = array();
+        foreach ($journeys as $journey) {
+            if (in_array($journey->full_url_list, $urls)) {
+                $foundJourneysUrls[] = $journey->full_url_list;
+            }
+            array_push($urls, $journey->full_url_list);
+        }
+
+        $foundJourneys = array();
+        foreach ($foundJourneysUrls as $foundJourneysUrl) {
+            foreach ($journeys as $journey) {
+                if ($journey->full_url_list == $foundJourneysUrl) {
+                    $foundJourneys[] = $journey;
+                }
+            }
+        }
+
+        return $foundJourneys;
     }
 }
