@@ -2,17 +2,21 @@ POST http://127.0.0.1:8000/api/storeVisit/
 Content-Type: application/json
 
 {
-    "customer" : "12333111",
-    "url" : "https://www.myStore.ro/category/5",
+    "customer" : "123331",
+    "url" : "https://www.myStore.ro/category/51",
     "type" : "category"
 }
 
 ### 
 
-GET http://127.0.0.1:8000/api/countLinkHits/?from=2022-03-26&to=2022-03-27&link=https://www.myStore.ro/product/1
+GET http://127.0.0.1:8000/api/countLinkHits/?from=2022-03-26&to=2022-03-27&link=https://www.myStore.ro/category/51
 Content-Type: application/json
 
 ###
 
-GET http://127.0.0.1:8000/api/countTypeHits/?from=2022-03-26&to=2022-03-27&link=https://www.myStore.ro/product/1
+GET http://127.0.0.1:8000/api/countTypeHits/?from=2022-03-26&to=2022-03-27
+Content-Type: application/json
+
+###
+GET http://127.0.0.1:8000/api/listCustomerJourney/?customer_id=123331&from=2022-03-26&to=2022-03-27
 Content-Type: application/json

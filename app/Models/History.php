@@ -106,27 +106,78 @@ class History extends Model
      * Count link hits
      * @param string $from 
      * @param string $to
-     * @param string $link  
+     * @param string $link
+     * @return int  
      */
     public static function countLinkHits($from = '', $to = '', $link = '')
     {
-        return self::whereBetween('created_at', [$from, $to])
-            ->where('full_url', $link)
+        $query = DB::table('histories');
+
+        // Date interval condition
+        if (strlen($from) > 0 || strlen($to) > 0) {
+            $query->whereBetween('histories.created_at', [$from, $to]);
+        }
+        $result = $query->where('full_url', $link)
             ->get()
             ->count();
+
+        return $result;
     }
 
+    /**
+     * @param string $from
+     * @param string $to
+     * @return array
+     */
     public static function countTypeHits($from = '', $to = '')
     {
-        return self::selectRaw(
+        $query = DB::table('histories');
+
+        $query->selectRaw(
             'histories.type_id as type_id,
             types.name as type_name,
             count(histories.type_id) as count'
-        )
-            ->leftJoin('types', 'types.id', '=', 'histories.type_id')
-            ->whereBetween('histories.created_at', [$from, $to])
+        );
+        $query->leftJoin('types', 'types.id', '=', 'histories.type_id');
+
+        // Date interval condition
+        if (strlen($from) > 0 || strlen($to) > 0) {
+            $query->whereBetween('histories.created_at', [$from, $to]);
+        }
+
+        $result = $query->whereBetween('histories.created_at', [$from, $to])
             ->groupBy('histories.type_id', 'types.name')
             ->get()
             ->toArray();
+
+        return $result;
+    }
+
+    /**
+     * List customer Journey
+     * @param string $customer_id
+     * @param string $from
+     * @param string $to
+     * @return array
+     */
+    public static function listCustomerJourney($customer_id, $from = '', $to = '')
+    {
+        DB::enableQueryLog();
+
+        $query = DB::table('histories');
+
+        $query->selectRaw('url, created_at')
+            ->where('customer_id', $customer_id);
+
+        // Date interval condition
+        if (strlen($from) > 0 || strlen($to) > 0) {
+            $query->whereBetween('histories.created_at', [$from, $to]);
+        }
+
+        $result = $query->orderBy('created_at', 'asc')
+            ->get()
+            ->toArray();
+
+        return $result;
     }
 }

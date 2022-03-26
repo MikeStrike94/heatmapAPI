@@ -6,7 +6,6 @@ use App\Models\Customer;
 use App\Models\History;
 use App\Models\Type;
 use Exception;
-use Illuminate\Http\Request;
 
 class HeatmapController extends Controller
 {
@@ -49,11 +48,7 @@ class HeatmapController extends Controller
         }
 
         // Return Success
-        return  response()->json(
-            [
-                'message' => 'Data inserted successfully'
-            ]
-        );
+        return  response()->json(['message' => 'Data inserted successfully']);
     }
 
     // Count number of hits of a given page by time interval
@@ -103,11 +98,44 @@ class HeatmapController extends Controller
         $json_data = array();
         foreach ($hits as $hit) {
             $json_data[] = array(
-                'type_name' => $hit['type_name'],
-                'count' => $hit['count']
+                'type_name' => $hit->type_name,
+                'count' => $hit->count
             );
         }
 
+        return json_encode($json_data);
+    }
+
+    // List customer journey
+    public function listCustomerJourney()
+    {
+        if (!request()->get('customer_id') || !is_numeric(request()->get('customer_id'))) {
+            return response()->json(['message' => 'customer_id not provided or is not numeric']);
+        }
+
+        $customer_id = request()->get('customer_id');
+        $from = request()->get('from', '');
+        $to = request()->get('to', '');
+
+        try {
+            $journeys = History::listCustomerJourney($customer_id, $from, $to);
+        } catch (Exception $e) {
+            return response()->json(
+                [
+                    'message' => 'Error at retriving customer journey',
+                    'error' => $e->getMessage()
+                ]
+            );
+        }
+
+        $json_data = array();
+        foreach ($journeys as $journey) {
+            $json_data[] = array(
+                'url' => $journey->url,
+                'date_time_accesed' => $journey->created_at
+            );
+        }
+        // Success
         return json_encode($json_data);
     }
 }
