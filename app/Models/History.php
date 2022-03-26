@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use GuzzleHttp\Psr7\Request;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Type;
+use Exception;
 
 class History extends Model
 {
@@ -25,7 +25,6 @@ class History extends Model
     ];
 
     private static $data;
-    private const MY_BASE_URL = 'www.myStore.ro';
 
     /** 
      * Load Request data
@@ -48,7 +47,14 @@ class History extends Model
         }
            
         $preparedData = self::prepareData();
-        self::create($preparedData);
+
+        try {
+            self::create($preparedData);
+        } catch(Exception $e) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -79,13 +85,11 @@ class History extends Model
         $data = self::$data;
 
         $fullUrl = $data['url'];
-        $baseUrl = 'https://' . self::MY_BASE_URL . '/';
-        $baseUrlParts = explode($baseUrl, $fullUrl);
-        $urlParts = explode('/', $baseUrlParts[1]);
+        $urlParts = explode('?', $fullUrl);
 
         $preparedData['full_url'] = $fullUrl;
         $preparedData['url'] = (isset($urlParts[0])) ? $urlParts[0] : null;
-        $preparedData['url_index'] = (isset($urlParts[1])) ? $urlParts[1] : null;
+        $preparedData['url_params'] = (isset($urlParts[1])) ? $urlParts[1] : null;
 
         $preparedData['type_id'] = Type::where('name', $data['type'])->first()->id;
         $preparedData['customer_id'] = $data['customer'];
