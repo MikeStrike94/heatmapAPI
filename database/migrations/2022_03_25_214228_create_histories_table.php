@@ -17,9 +17,9 @@ class CreateHistoriesTable extends Migration
             $table->id();
             $table->integer('type_id')->nullable(false);
             $table->integer('customer_id')->nullable(false);
-            $table->string('fullUrl')->nullable(false);
-            $table->string('baseUrl')->nullable(false);
-            $table->string('tailUrl')->nullable(false);
+            $table->string('full_url')->nullable(false);
+            $table->string('url')->nullable(false);
+            $table->string('url_index')->nullable(false);
             $table->timestamps();
 
             $table->index('type_id');

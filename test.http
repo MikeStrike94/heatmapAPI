@@ -2,7 +2,7 @@ POST http://127.0.0.1:8000/api/storeVisit/
 Content-Type: application/json
 
 {
-    "url" : "https://www.myStore.ro/product/3",
-    "type" : "product",
-    "user" : "1234"
+    "customer" : "123333",
+    "url" : "https://www.myStore.ro/product/6",
+    "type" : "product"
 }
