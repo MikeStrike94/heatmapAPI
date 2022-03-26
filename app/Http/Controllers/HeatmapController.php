@@ -10,7 +10,8 @@ use Illuminate\Http\Request;
 
 class HeatmapController extends Controller
 {
-    public function storeVisit(Request $request) {
+    public function storeVisit()
+    {
         // Required fields
         request()->validate([
             'customer' => 'required',
@@ -31,14 +32,14 @@ class HeatmapController extends Controller
                 ]
             );
         }
-        
+
         // Load History Data
         $requestData = request()->all();
         History::loadData($requestData);
 
         try {
             History::storeData();
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             return response()->json(
                 [
                     'message' => 'Error at inserting History Data',
@@ -53,5 +54,60 @@ class HeatmapController extends Controller
                 'message' => 'Data inserted successfully'
             ]
         );
+    }
+
+    // Count number of hits of a given page by time interval
+    public function countLinkHits()
+    {
+        $from = request()->get('from', '');
+        $to = request()->get('to', '');
+        $link = request()->get('link', '');
+
+        try {
+            $hits = History::countLinkHits($from, $to, $link);
+        } catch (Exception $e) {
+            return response()->json(
+                [
+                    'message' => 'Error at counting link hits',
+                    'error' => $e->getMessage()
+                ]
+            );
+        }
+
+        // Success
+        return  response()->json(
+            [
+                'link' => $link,
+                'hits' => $hits
+            ]
+        );
+    }
+
+    // Count number of hits for each link type
+    public function countTypeHits()
+    {
+        $from = request()->get('from', '');
+        $to = request()->get('to', '');
+
+        try {
+            $hits = History::countTypeHits($from, $to);
+        } catch (Exception $e) {
+            return response()->json(
+                [
+                    'message' => 'Error at counting type hits',
+                    'error' => $e->getMessage()
+                ]
+            );
+        }
+
+        $json_data = array();
+        foreach ($hits as $hit) {
+            $json_data[] = array(
+                'type_name' => $hit['type_name'],
+                'count' => $hit['count']
+            );
+        }
+
+        return json_encode($json_data);
     }
 }

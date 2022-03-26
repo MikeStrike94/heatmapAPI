@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Type;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class History extends Model
 {
@@ -21,7 +22,7 @@ class History extends Model
         'customer_id',
         'full_url',
         'url',
-        'url_index'
+        'url_params'
     ];
 
     private static $data;
@@ -29,7 +30,8 @@ class History extends Model
     /** 
      * Load Request data
      */
-    public static function loadData($data) {
+    public static function loadData($data)
+    {
         if (!isset($data)) {
             return false;
         }
@@ -41,16 +43,17 @@ class History extends Model
      * Save user history data
      * @param array $data
      */
-    public static function storeData() {
+    public static function storeData()
+    {
         if (!self::validateData()) {
             return false;
         }
-           
+
         $preparedData = self::prepareData();
 
         try {
             self::create($preparedData);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             return false;
         }
 
@@ -61,14 +64,15 @@ class History extends Model
      * Validate request data
      * @return bool
      */
-    private static function validateData() {
+    private static function validateData()
+    {
         $data = self::$data;
         if (!isset($data)) {
             return false;
         }
 
         $fieldsToValidate = array('url', 'type', 'customer');
-        foreach($fieldsToValidate as $field) {
+        foreach ($fieldsToValidate as $field) {
             if (!isset($data[$field]) || strlen($data[$field]) < 1) {
                 return false;
             }
@@ -81,7 +85,8 @@ class History extends Model
      * Prepare data for inserting in db
      * @return array $data
      */
-    private static function prepareData() {
+    private static function prepareData()
+    {
         $data = self::$data;
 
         $fullUrl = $data['url'];
@@ -95,5 +100,33 @@ class History extends Model
         $preparedData['customer_id'] = $data['customer'];
 
         return $preparedData;
+    }
+
+    /**
+     * Count link hits
+     * @param string $from 
+     * @param string $to
+     * @param string $link  
+     */
+    public static function countLinkHits($from = '', $to = '', $link = '')
+    {
+        return self::whereBetween('created_at', [$from, $to])
+            ->where('full_url', $link)
+            ->get()
+            ->count();
+    }
+
+    public static function countTypeHits($from = '', $to = '')
+    {
+        return self::selectRaw(
+            'histories.type_id as type_id,
+            types.name as type_name,
+            count(histories.type_id) as count'
+        )
+            ->leftJoin('types', 'types.id', '=', 'histories.type_id')
+            ->whereBetween('histories.created_at', [$from, $to])
+            ->groupBy('histories.type_id', 'types.name')
+            ->get()
+            ->toArray();
     }
 }

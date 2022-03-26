@@ -3,6 +3,16 @@ Content-Type: application/json
 
 {
     "customer" : "12333111",
-    "url" : "https://www.myStore.ro/product/6",
-    "type" : "product"
+    "url" : "https://www.myStore.ro/category/5",
+    "type" : "category"
 }
+
+### 
+
+GET http://127.0.0.1:8000/api/countLinkHits/?from=2022-03-26&to=2022-03-27&link=https://www.myStore.ro/product/1
+Content-Type: application/json
+
+###
+
+GET http://127.0.0.1:8000/api/countTypeHits/?from=2022-03-26&to=2022-03-27&link=https://www.myStore.ro/product/1
+Content-Type: application/json

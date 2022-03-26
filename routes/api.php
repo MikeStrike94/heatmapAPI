@@ -20,3 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/storeVisit', [HeatmapController::class, 'storeVisit']);
+
+Route::get('/countLinkHits', [HeatmapController::class, 'countLinkHits']);
+Route::get('/countTypeHits', [HeatmapController::class, 'countTypeHits']);
